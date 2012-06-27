@@ -1,0 +1,60 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+tcltest::test version-1 {xs version} -body {
+    puts [xs version]
+} -returnCodes {ok}
+
+
+tcltest::test errno-1 {xs errno} -body {
+    puts [xs errno]
+} -returnCodes {ok}
+
+tcltest::test errno-2 {xs errno} -body {
+    puts [xs errno qwerty]
+} -returnCodes {error} -result {wrong # args: should be "xs errno "}
+
+
+tcltest::test strerror-1 {xs strerror} -body {
+    xs strerror
+} -returnCodes {error} -result {wrong # args: should be "xs strerror errnum"}
+
+tcltest::test strerror-2 {xs strerror} -body {
+    xs strerror qwerty
+} -returnCodes {error} -result {Wrong errnum argument, expected integer}
+
+tcltest::test strerror-3-unix {xs strerror} -constraints {unix} -body {
+    xs strerror 0
+} -returnCodes {ok} -result {Success}
+
+tcltest::test strerror-3-win {xs strerror} -constraints {win} -body {
+    xs strerror 0
+} -returnCodes {ok} -result {No error}
+
+
+tcltest::test max_block_time-1 {xs max_block_time} -body {
+    xs max_block_time
+} -returnCodes {error} -result {wrong # args: should be "xs max_block_time block_time"}
+
+tcltest::test max_block_time-2 {xs max_block_time} -body {
+    xs max_block_time qwerty
+} -returnCodes {error} -result {Wrong block_time argument, expected integer}
+
+tcltest::test max_block_time-3 {xs max_block_time} -body {
+    xs max_block_time 0
+} -returnCodes {ok}
+
+
+tcltest::test zframe_strhex-1 {xs zframe_strhex} -body {
+    xs zframe_strhex
+} -returnCodes {error} -result {wrong # args: should be "xs zframe_strhex string"}
+
+tcltest::test zframe_strhex-2 {xs zframe_strhex} -body {
+    xs zframe_strhex abcdefg
+} -returnCodes {ok} -result {61626364656667}
+
+# cleanup
+::tcltest::cleanupTests
+return
+
