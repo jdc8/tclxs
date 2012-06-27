@@ -1,0 +1,523 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+tcltest::test message-2.1 {xs message} -body {
+    xs message a
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {::a}
+
+tcltest::test message-2.2 {xs message} -body {
+    set m [xs message]
+    string match "::xs*" $m
+} -cleanup {
+    $m close
+} -returnCodes {ok} -result {1}
+
+tcltest::test message-3 {xs message} -setup {
+    xs message a
+} -body {
+    xs message a
+} -cleanup {
+    a close
+} -returnCodes {error} -result {command "::a" already exists, unable to create object}
+
+tcltest::test message-4.1 {xs message} -body {
+    xs message a -data "qwerty"
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {::a}
+
+tcltest::test message-4.2 {xs message} -body {
+    set m [xs message -data "qwerty"]
+    string match "::xs*" $m
+} -cleanup {
+    $m close
+} -returnCodes {ok} -result {1}
+
+tcltest::test message-5.1 {xs message} -body {
+    xs message a -data "qwerty" -size azerty
+} -returnCodes {error} -result {Wrong size argument, expected integer}
+
+tcltest::test message-5.2 {xs message} -body {
+    xs message -data "qwerty" -size azerty
+} -returnCodes {error} -result {Wrong size argument, expected integer}
+
+tcltest::test message-6.1 {xs message} -body {
+    xs message a -data
+} -returnCodes {error} -result {bad parameter "a": must be -data or -size}
+
+tcltest::test message-6.2 {xs message} -body {
+    xs message -data
+} -cleanup {
+    -data close
+} -returnCodes {ok} -result {::-data}
+
+tcltest::test message-7.1 {xs message} -body {
+    xs message a -data "qwerty" -size 4
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {::a}
+
+tcltest::test message-7.2 {xs message} -body {
+    set m [xs message -data "qwerty" -size 4]
+    string match "::xs*" $m
+} -cleanup {
+    $m close
+} -returnCodes {ok} -result {1}
+
+tcltest::test message-8 {xs message} -body {
+    xs message a -data "qwerty"
+    xs message b -data "qwerty" -size 4
+    lappend r [a data]
+    lappend r [b data]
+    lappend r [a size]
+    lappend r [b size]
+} -cleanup {
+    a close
+    b close
+} -returnCodes {ok} -result {qwerty qwer 6 4}
+
+tcltest::test message-9.1 {xs message} -setup {
+    xs message a
+} -body {
+    a qwerty
+} -cleanup {
+    a close
+} -returnCodes {error} -result {bad method "qwerty": must be cget, close, configure, copy, data, destroy, move, size, dump, get, getmsgopt, set, setmsgopt, send, sendmore, or recv}
+
+tcltest::test message-9.2 {xs message} -setup {
+    xs message a
+} -body {
+    a close
+} -returnCodes {ok}
+
+tcltest::test message-9.3 {xs message} -setup {
+    xs message a
+} -body {
+    a destroy
+} -returnCodes {ok}
+
+tcltest::test message-9.4 {xs message} -setup {
+    xs message a
+} -body {
+    a close 1 2 3 4
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a close "}
+
+tcltest::test message-9.5 {xs message} -setup {
+    xs message a
+} -body {
+    a destroy 1 2 3 4
+} -cleanup {
+    a destroy
+} -returnCodes {error} -result {wrong # args: should be "a destroy "}
+
+tcltest::test message-10 {xs message} -setup {
+    xs message a
+} -body {
+    a copy
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a copy dest_message"}
+
+tcltest::test message-11 {xs message} -setup {
+    xs message a
+} -body {
+    a copy b
+} -cleanup {
+    a close
+} -returnCodes {error} -result {message "b" does not exists}
+
+tcltest::test message-12 {xs message} -setup {
+    xs message a -data "azerty"
+    xs message b
+} -body {
+    a copy b
+    b data
+} -cleanup {
+    a close
+    b close
+} -returnCodes {ok} -result {azerty}
+
+tcltest::test message-13 {xs message} -setup {
+    xs message a
+} -body {
+    a data 1 2 3 4
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a data "}
+
+tcltest::test message-14 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a data
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {qwerty}
+
+tcltest::test message-15 {xs message} -setup {
+    xs message a
+} -body {
+    a move
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a move dest_message"}
+
+tcltest::test message-16 {xs message} -setup {
+    xs message a
+} -body {
+    a move b
+} -cleanup {
+    a close
+} -returnCodes {error} -result {message "b" does not exists}
+
+tcltest::test message-17 {xs message} -setup {
+    xs message a -data "azerty"
+    xs message b
+} -body {
+    a move b
+    b data
+} -cleanup {
+    a close
+    b close
+} -returnCodes {ok} -result {azerty}
+
+tcltest::test message-18 {xs message} -setup {
+    xs message a
+} -body {
+    a size 1 2 3 4
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a size "}
+
+tcltest::test message-19 {xs message} -setup {
+    xs message a -size 66
+} -body {
+    a size
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {66}
+
+tcltest::test message-20 {xs message} -setup {
+    xs message a
+} -body {
+    a dump 1 2 3 4
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a dump "}
+
+tcltest::test message-21 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a dump
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {[006] qwerty}
+
+tcltest::test message-25 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a get
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a get name"}
+
+tcltest::test message-26 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a get QWERTY
+} -cleanup {
+    a close
+} -returnCodes {error} -result {bad name "QWERTY": must be MORE}
+
+tcltest::test message-27 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a get MORE
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {0}
+
+tcltest::test message-28 {xs message} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    req sendmore "message"
+    req send "more"
+    xs message mrep
+} -body {
+    rep recvmsg mrep
+    mrep get MORE
+} -cleanup {
+    mrep close
+    req set LINGER 0
+    rep set LINGER 0
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {1}
+
+tcltest::test message-25.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a cget
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a cget name"}
+
+tcltest::test message-26.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a cget QWERTY
+} -cleanup {
+    a close
+} -returnCodes {error} -result {bad name "QWERTY": must be MORE}
+
+tcltest::test message-27.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a cget MORE
+} -cleanup {
+    a close
+} -returnCodes {ok} -result {0}
+
+tcltest::test message-28.1 {xs message} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    req sendmore "message"
+    req send "more"
+    xs message mrep
+} -body {
+    rep recvmsg mrep
+    mrep cget MORE
+} -cleanup {
+    mrep close
+    req set LINGER 0
+    rep set LINGER 0
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {1}
+
+tcltest::test message-29 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a set
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a set name value"}
+
+tcltest::test message-30 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a set QWERTY 1
+} -cleanup {
+    a close
+} -returnCodes {error} -result {bad name "QWERTY": must be MORE}
+
+tcltest::test message-32 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a set MORE 1
+} -cleanup {
+    a close
+} -returnCodes {error} -result {unsupported option}
+
+tcltest::test message-33.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a send
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a send socket ?flags?"}
+
+tcltest::test message-33.2 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a send s
+} -cleanup {
+    a close
+} -returnCodes {error} -result {socket "s" does not exists}
+
+tcltest::test message-33.3 {xs message} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+    xs message a -data "qwerty"
+} -body {
+    a send s QWERTY
+} -cleanup {
+    a close
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test message-33.4 {xs message} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message a -data "qwerty"
+} -body {
+    a send req
+    rep recv
+} -cleanup {
+    a close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {qwerty}
+
+tcltest::test message-34.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a sendmore
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a sendmore socket ?flags?"}
+
+tcltest::test message-34.2 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a sendmore s
+} -cleanup {
+    a close
+} -returnCodes {error} -result {socket "s" does not exists}
+
+tcltest::test message-34.3 {xs message} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+    xs message a -data "qwerty"
+} -body {
+    a sendmore s QWERTY
+} -cleanup {
+    a close
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test message-34.4 {xs message} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message a -data "qwerty"
+    xs message b -data "azerty"
+} -body {
+    a sendmore req
+    b send req
+    set r {}
+    lappend r [rep recv]
+    lappend r [rep recv]
+} -cleanup {
+    a close
+    b close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {qwerty azerty}
+
+tcltest::test message-35.1 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a recv
+} -cleanup {
+    a close
+} -returnCodes {error} -result {wrong # args: should be "a recv socket ?flags?"}
+
+tcltest::test message-35.2 {xs message} -setup {
+    xs message a -data "qwerty"
+} -body {
+    a recv s
+} -cleanup {
+    a close
+} -returnCodes {error} -result {socket "s" does not exists}
+
+tcltest::test message-35.3 {xs message} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+    xs message a -data "qwerty"
+} -body {
+    a recv s QWERTY
+} -cleanup {
+    a close
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test message-35.4 {xs message} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message a
+    xs message b
+} -body {
+    req sendmore qwerty
+    req send azerty
+    a recv rep
+    b recv rep
+    list [a data] [b data]
+} -cleanup {
+    a close
+    b close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {qwerty azerty}
+
+
+
+tcltest::test message-36.1 {xs message} -setup {
+    xs message a
+} -body {
+    a configure
+} -cleanup {
+    a destroy
+} -returnCodes {ok} -result {{MORE 0}}
+
+tcltest::test message-36.2 {xs message} -setup {
+    xs message a
+} -body {
+    a configure MORE
+} -cleanup {
+    a destroy
+} -returnCodes {ok} -result {MORE 0}
+
+tcltest::test message-36.3 {xs message} -setup {
+    xs message a
+} -body {
+    a configure QWERTY
+} -cleanup {
+    a destroy
+} -returnCodes {error} -result {bad name "QWERTY": must be MORE}
+
+tcltest::test message-36.4 {xs message} -setup {
+    xs message a
+} -body {
+    a configure MORE 1
+} -cleanup {
+    a destroy
+} -returnCodes {error} -result {unsupported option}
+
+tcltest::test message-36.5 {xs message} -setup {
+    xs message a
+} -body {
+    a configure MORE 1 QWERTY
+} -cleanup {
+    a destroy
+} -returnCodes {error} -result {wrong # args: should be "a configure ?name? ?value option value ...?"}
+
+# cleanup
+::tcltest::cleanupTests
+return

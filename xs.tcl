@@ -1225,11 +1225,11 @@ critcl::ccode {
     int xs_message_objcmd(ClientData cd, Tcl_Interp* ip, int objc, Tcl_Obj* const objv[]) {
 	static const char* methods[] = {"cget", "close", "configure", "copy", "data",
 					"destroy", "move", "size", "dump", "get",
-					"getmsgopt", "set", "setmsgopt", "send", "sendmore", "recv", "more", NULL};
+					"getmsgopt", "set", "setmsgopt", "send", "sendmore", "recv", NULL};
 	enum ExObjMessageMethods {EXMSGOBJ_CGET, EXMSGOBJ_CLOSE, EXMSGOBJ_CONFIGURE, EXMSGOBJ_COPY, EXMSGOBJ_DATA,
 				  EXMSGOBJ_DESTROY, EXMSGOBJ_MOVE, EXMSGOBJ_SIZE, EXMSGOBJ_SDUMP, EXMSGOBJ_GET,
 				  EXMSGOBJ_GETMSGOPT, EXMSGOBJ_SET, EXMSGOBJ_SETMSGOPT, EXMSGOBJ_SEND, EXMSGOBJ_SENDMORE,
-				  EXMSGOBJ_RECV, EXMSGOBJ_MORE};
+				  EXMSGOBJ_RECV};
 	int index = -1;
 	void* msgp = 0;
 	if (objc < 2) {
@@ -1352,24 +1352,6 @@ critcl::ccode {
 		return TCL_ERROR;
 	    }
 	    return cget_message_option(cd, ip, objv[2]);
-	}
-	case EXMSGOBJ_MORE:
-	{
-	    int rt = 0;
-	    /*
-	    if (objc != 2) {
-		Tcl_WrongNumArgs(ip, 2, objv, "");
-		return TCL_ERROR;
-	    }
-	    rt = xs_msg_more(msgp);
-	    last_xs_errno = xs_errno();
-	    if (rt < 0) {
-		Tcl_SetObjResult(ip, Tcl_NewStringObj(xs_strerror(last_xs_errno), -1));
-		return TCL_ERROR;
-	    }
-	    */
-	    Tcl_SetObjResult(ip, Tcl_NewIntObj(rt));
-	    break;
 	}
         case EXMSGOBJ_MOVE:
         {
