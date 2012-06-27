@@ -709,27 +709,7 @@ tcltest::test socket-17.4 {xs socket} -setup {
     ctx term
 } -returnCodes {ok} -result {21-21}
 
-tcltest::test socket-17.5.unix {xs socket} -constraints {unix} -setup {
-    xs context ctx
-    xs socket s ctx SUB
-} -body {
-    set nok 0
-    set cnok 0
-    foreach name {RCVMORE FD EVENTS TYPE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
-	if {[catch {s setsockopt $name 1} msg]} {
-	    incr nok
-	}
-	if {[catch {s configure $name 1} msg]} {
-	    incr cnok
-	}
-    }
-    set a $nok-$cnok
-} -cleanup {
-    s close
-    ctx term
-} -returnCodes {ok} -result {7-7}
-
-tcltest::test socket-17.5.win {xs socket} -constraints {win} -setup {
+tcltest::test socket-17.5.unix {xs socket} -setup {
     xs context ctx
     xs socket s ctx SUB
 } -body {
@@ -748,6 +728,26 @@ tcltest::test socket-17.5.win {xs socket} -constraints {win} -setup {
     s close
     ctx term
 } -returnCodes {ok} -result {6-6}
+
+tcltest::test socket-17.5.win {xs socket} -constraints {unix} -setup {
+    xs context ctx
+    xs socket s ctx SUB
+} -body {
+    set nok 0
+    set cnok 0
+    foreach name {FD} {
+	if {[catch {s setsockopt $name 1} msg]} {
+	    incr nok
+	}
+	if {[catch {s configure $name 1} msg]} {
+	    incr cnok
+	}
+    }
+    set a $nok-$cnok
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {1-1}
 
 tcltest::test socket-17.6 {xs socket} -setup {
     xs context ctx
