@@ -57,7 +57,7 @@ endif
 
 cd tclxs
 
-$TCLSH build.tcl install lib -zmq /tmp/libxs -static
+$TCLSH build.tcl install lib -xs /tmp/libxs -static
 if ($status) then
     set failed = 1
     goto cddone
