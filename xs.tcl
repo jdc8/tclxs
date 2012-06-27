@@ -714,14 +714,14 @@ critcl::ccode {
     int xs_socket_objcmd(ClientData cd, Tcl_Interp* ip, int objc, Tcl_Obj* const objv[]) {
 	static const char* methods[] = {"bind", "cget", "close", "configure", "connect",
 					"destroy", "get", "getsockopt",
-					"readable", "recv_msg", "send_msg", "dump", "recv",
+					"readable", "recvmsg", "sendmsg", "dump", "recv",
 					"send", "sendmore", "set", "setsockopt",
-					"writable", NULL};
+					"writable", "shutdown", NULL};
 	enum ExObjSocketMethods {EXSOCKOBJ_BIND, EXSOCKOBJ_CGET, EXSOCKOBJ_CLOSE, EXSOCKOBJ_CONFIGURE, EXSOCKOBJ_CONNECT,
 				 EXSOCKOBJ_DESTROY, EXSOCKOBJ_GET, EXSOCKOBJ_GETSOCKETOPT,
-				 EXSOCKOBJ_READABLE, EXSOCKOBJ_RECV, EXSOCKOBJ_SEND, EXSOCKOBJ_S_DUMP, EXSOCKOBJ_S_RECV,
-				 EXSOCKOBJ_S_SEND, EXSOCKOBJ_S_SENDMORE, EXSOCKOBJ_SET, EXSOCKOBJ_SETSOCKETOPT,
-				 EXSOCKOBJ_WRITABLE};
+				 EXSOCKOBJ_READABLE, EXSOCKOBJ_RECVMSG, EXSOCKOBJ_SENDMSG, EXSOCKOBJ_DUMP, EXSOCKOBJ_RECV,
+				 EXSOCKOBJ_SEND, EXSOCKOBJ_SENDMORE, EXSOCKOBJ_SET, EXSOCKOBJ_SETSOCKETOPT,
+				 EXSOCKOBJ_WRITABLE, EXSOCKOBJ_SHUTDOWN};
 	int index = -1;
 	void* sockp = ((XsSocketClientData*)cd)->socket;
 	XsClientData* xsClientData = (((XsSocketClientData*)cd)->xsClientData);
@@ -743,10 +743,11 @@ critcl::ccode {
 	    endpoint = Tcl_GetStringFromObj(objv[2], 0);
 	    rt = xs_bind(sockp, endpoint);
 	    last_xs_errno = xs_errno();
-	    if (rt != 0) {
+	    if (rt < 0) {
 		Tcl_SetObjResult(ip, Tcl_NewStringObj(xs_strerror(last_xs_errno), -1));
 		return TCL_ERROR;
 	    }
+	    Tcl_SetObjResult(ip, Tcl_NewIntObj(rt));
 	    break;
 	}
 	case EXSOCKOBJ_CLOSE:
@@ -841,10 +842,11 @@ critcl::ccode {
 	    endpoint = Tcl_GetStringFromObj(objv[2], 0);
 	    rt = xs_connect(sockp, endpoint);
 	    last_xs_errno = xs_errno();
-	    if (rt != 0) {
+	    if (rt < 0) {
 		Tcl_SetObjResult(ip, Tcl_NewStringObj(xs_strerror(last_xs_errno), -1));
 		return TCL_ERROR;
 	    }
+	    Tcl_SetObjResult(ip, Tcl_NewIntObj(rt));
 	    break;
 	}
 	case EXSOCKOBJ_CGET:
@@ -908,7 +910,7 @@ critcl::ccode {
 	    }
 	    break;
 	}
-	case EXSOCKOBJ_RECV:
+	case EXSOCKOBJ_RECVMSG:
 	{
 	    void* msgp = 0;
 	    int flags = 0;
@@ -933,7 +935,7 @@ critcl::ccode {
 	    Tcl_SetObjResult(ip, Tcl_NewIntObj(rt));
 	    break;
 	}
-	case EXSOCKOBJ_SEND:
+	case EXSOCKOBJ_SENDMSG:
 	{
 	    void* msgp = 0;
 	    int flags = 0;
@@ -958,7 +960,7 @@ critcl::ccode {
 	    Tcl_SetObjResult(ip, Tcl_NewIntObj(rt));
 	    break;
 	}
-	case EXSOCKOBJ_S_DUMP:
+	case EXSOCKOBJ_DUMP:
 	{
 	    Tcl_Obj* result = 0;
 	    if (objc != 2) {
@@ -986,7 +988,7 @@ critcl::ccode {
 	    Tcl_SetObjResult(ip, result);
 	    break;
 	}
-	case EXSOCKOBJ_S_RECV:
+	case EXSOCKOBJ_RECV:
 	{
 	    xs_msg_t msg;
 	    int rt = 0;
@@ -1015,7 +1017,7 @@ critcl::ccode {
 	    xs_msg_close(&msg);
 	    break;
 	}
-	case EXSOCKOBJ_S_SEND:
+	case EXSOCKOBJ_SEND:
 	{
 	    int size = 0;
 	    int rt = 0;
@@ -1047,7 +1049,7 @@ critcl::ccode {
 	    }
 	    break;
 	}
-	case EXSOCKOBJ_S_SENDMORE:
+	case EXSOCKOBJ_SENDMORE:
 	{
 	    int size = 0;
 	    int rt = 0;
@@ -1137,6 +1139,26 @@ critcl::ccode {
 		    }
 		}
 		Tcl_WaitForEvent(&waitTime);
+	    }
+	    break;
+	}
+	case EXSOCKOBJ_SHUTDOWN:
+	{
+	    int rt = 0;
+	    int endpoint = -1;
+	    if (objc != 3) {
+		Tcl_WrongNumArgs(ip, 2, objv, "endpoint_id");
+		return TCL_ERROR;
+	    }
+	    if (Tcl_GetIntFromObj(ip, objv[2], &endpoint) != TCL_OK) {
+		Tcl_SetObjResult(ip, Tcl_NewStringObj("Wrong endpoint_id value, expected integer", -1));
+		return TCL_ERROR;
+	    }
+	    rt = xs_shutdown(sockp, endpoint);
+	    last_xs_errno = xs_errno();
+	    if (rt != 0) {
+		Tcl_SetObjResult(ip, Tcl_NewStringObj(xs_strerror(last_xs_errno), -1));
+		return TCL_ERROR;
 	    }
 	    break;
 	}
