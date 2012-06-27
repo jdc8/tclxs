@@ -274,15 +274,11 @@ tcltest::test socket-9.5 {xs socket} -setup {
     xs socket s ctx PUB
 } -body {
     set ok 0
-    set nok 0
     set cgok 0
-    set cgnok 0
     set cok 0
-    set cnok 0
-    foreach name {HWM SNDHWM RCVHWM AFFINITY IDENTITY SUBSCRIBE UNSUBSCRIBE RATE RECOVERY_IVL SNDBUF RCVBUF RCVMORE FD EVENTS TYPE LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+    foreach name {SNDHWM RCVHWM AFFINITY IDENTITY RATE RECOVERY_IVL SNDBUF RCVBUF RCVMORE FD EVENTS TYPE LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE} {
 	if {[catch {s getsockopt $name} msg]} {
 	    puts "get $name : $msg"
-	    incr nok
 	} else {
 	    incr ok
 	}
@@ -299,11 +295,35 @@ tcltest::test socket-9.5 {xs socket} -setup {
 	    incr cok
 	}
     }
-    set a $ok.$nok-$cgok.$cgnok-$cok.$cnok
+    set a $ok-$cgok-$cok
 } -cleanup {
     s close
     ctx term
-} -returnCodes {ok} -result {22.6-22.6-22.6}
+} -returnCodes {ok} -result {22-22-22}
+
+tcltest::test socket-9.5 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    set nok 0
+    set cgnok 0
+    set cnok 0
+    foreach name {HWM SUBSCRIBE UNSUBSCRIBE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+	if {[catch {s getsockopt $name} msg]} {
+	    incr nok
+	}
+	if {[catch {s cget $name} msg]} {
+	    incr cgnok
+	}
+	if {[catch {s configure $name} msg]} {
+	    incr cnok
+	}
+    }
+    set a $nok-$cgnok-$cnok
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {6-6-6}
 
 
 
@@ -670,30 +690,46 @@ tcltest::test socket-17.4 {xs socket} -setup {
     xs socket s ctx SUB
 } -body {
     set ok 0
-    set nok 0
     set cok 0
-    set cnok 0
-    foreach name {HWM SNDHWM RCVHWM AFFINITY IDENTITY SUBSCRIBE UNSUBSCRIBE RATE RECOVERY_IVL SNDBUF RCVBUF RCVMORE FD EVENTS TYPE LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+    foreach name {HWM SNDHWM RCVHWM AFFINITY IDENTITY SUBSCRIBE UNSUBSCRIBE RATE RECOVERY_IVL SNDBUF RCVBUF LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE} {
 	if {[catch {s setsockopt $name 1} msg]} {
 	    puts "set $name : $msg"
-	    incr nok
 	} else {
 	    incr ok
 	}
 	if {[catch {s configure $name 1} msg]} {
 	    puts "configure $name : $msg"
-	    incr cnok
 	} else {
 	    incr cok
 	}
     }
-    set a $ok.$nok-$cok.$cnok
+    set a $ok-$cok
 } -cleanup {
     s close
     ctx term
-} -returnCodes {ok} -result {21.7-21.7}
+} -returnCodes {ok} -result {21-21}
 
 tcltest::test socket-17.5 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx SUB
+} -body {
+    set nok 0
+    set cnok 0
+    foreach name {RCVMORE FD EVENTS TYPE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+	if {[catch {s setsockopt $name 1} msg]} {
+	    incr nok
+	}
+	if {[catch {s configure $name 1} msg]} {
+	    incr cnok
+	}
+    }
+    set a $nok-$cnok
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {7-7}
+
+tcltest::test socket-17.6 {xs socket} -setup {
     xs context ctx
     xs socket s ctx PUB
 } -body {
@@ -703,7 +739,7 @@ tcltest::test socket-17.5 {xs socket} -setup {
     ctx term
 } -returnCodes {error} -result {Wrong HWM argument, expected integer}
 
-tcltest::test socket-17.6 {xs socket} -setup {
+tcltest::test socket-17.7 {xs socket} -setup {
     xs context ctx
     xs socket s ctx PUB
 } -body {
@@ -713,7 +749,7 @@ tcltest::test socket-17.6 {xs socket} -setup {
     ctx term
 } -returnCodes {error} -result {Wrong size argument, expected integer}
 
-tcltest::test socket-17.7 {xs socket} -setup {
+tcltest::test socket-17.8 {xs socket} -setup {
     xs context ctx
     xs socket rep ctx REP
 } -body {
@@ -726,7 +762,7 @@ tcltest::test socket-17.7 {xs socket} -setup {
     ctx term
 } -returnCodes {error} -result {wrong # args: should be "rep configure ?name? ?value option value ...?"}
 
-tcltest::test socket-17.8 {xs socket} -setup {
+tcltest::test socket-17.9 {xs socket} -setup {
     xs context ctx
     xs socket rep ctx REP
 } -body {

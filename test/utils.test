@@ -3,16 +3,16 @@ set auto_path [list ../lib {*}$auto_path]
 package require -exact xs 1.2
 
 tcltest::test version-1 {xs version} -body {
-    puts [xs version]
-} -returnCodes {ok}
+    string match "*.*.*" [xs version]
+} -returnCodes {ok} -result 1
 
 
 tcltest::test errno-1 {xs errno} -body {
-    puts [xs errno]
-} -returnCodes {ok}
+    string is integer -strict [xs errno]
+} -returnCodes {ok} -result 1
 
 tcltest::test errno-2 {xs errno} -body {
-    puts [xs errno qwerty]
+    xs errno qwerty
 } -returnCodes {error} -result {wrong # args: should be "xs errno "}
 
 
