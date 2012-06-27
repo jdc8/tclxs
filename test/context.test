@@ -1,0 +1,195 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+
+
+tcltest::test context-1.1 {xs context} -body {
+    xs context ctx -1
+} -returnCodes {error} -result {wrong # args: should be "xs context ?name?"}
+
+tcltest::test context-1.2 {xs context} -body {
+    xs context ctx
+} -cleanup {
+    ctx term
+} -returnCodes {ok} -result {::ctx}
+
+tcltest::test context-1.3 {xs context} -body {
+    set c [xs context]
+    string match "::xs*" $c
+} -cleanup {
+    $c term
+} -returnCodes {ok} -result {1}
+
+tcltest::test context-1.4 {xs context} -setup {
+    xs context ctx
+} -body {
+    xs context ctx
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {command "::ctx" already exists, unable to create object}
+
+
+
+tcltest::test context-2.1 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "ctx method ?argument ...?"}
+
+tcltest::test context-2.2 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx qwerty
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad method "qwerty": must be cget, configure, destroy, get, set, or term}
+
+
+
+tcltest::test context-3 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx term
+} -returnCodes {ok} -result {}
+
+
+
+tcltest::test context-4.1 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx set
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "ctx set name value"}
+
+tcltest::test context-4.2 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx set QWERTY AZERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad name "QWERTY": must be IO_THREADS, MAX_SOCKETS, or PLUGIN}
+
+tcltest::test context-4.3 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx set IO_THREADS AZERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {Wrong option value, expected integer}
+
+tcltest::test context-4.4 {xs context} -setup {
+    xs context ctx
+} -body {
+    set ok 0
+    foreach p {IO_THREADS MAX_SOCKETS} {
+	if {[catch {ctx set $p 1} msg]} {
+	    puts "set $p: $msg"
+	} else {
+	    incr ok
+	}
+    }
+    set ok
+} -cleanup {
+    ctx term
+} -returnCodes {ok} -result 2
+
+
+
+tcltest::test context-5.1 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx get
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "ctx get name"}
+
+tcltest::test context-5.2 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx cget
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "ctx cget name"}
+
+tcltest::test context-5.3 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx get QWERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad name "QWERTY": must be IO_THREADS, MAX_SOCKETS, or PLUGIN}
+
+tcltest::test context-5.4 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx cget QWERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad name "QWERTY": must be IO_THREADS, MAX_SOCKETS, or PLUGIN}
+
+tcltest::test context-5.5 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx configure QWERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad name "QWERTY": must be IO_THREADS, MAX_SOCKETS, or PLUGIN}
+
+tcltest::test context-5.6 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx get IO_THREADS
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {Can not get context options}
+
+tcltest::test context-5.7 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx cget IO_THREADS
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {Can not get context options}
+
+tcltest::test context-5.8 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx configure IO_THREADS
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {Can not get context options}
+
+tcltest::test context-5.9 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx configure
+} -cleanup {
+    ctx term
+} -returnCodes {ok} -result {}
+
+tcltest::test context-5.10 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx configure QWERTY 1 AZERTY
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "ctx configure ?name? ?value option value ...?"}
+
+tcltest::test context-5.11 {xs context} -setup {
+    xs context ctx
+} -body {
+    ctx configure IO_THREADS 22 MAX_SOCKETS 2
+} -cleanup {
+    ctx term
+} -returnCodes {ok} -result {}
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+
+

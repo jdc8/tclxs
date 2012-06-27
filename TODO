@@ -1,2 +1,2 @@
-- xs_bind and xs_connect return an id
-- xs_shutdown -> needs bind id's
+- What to do with context option PLUGIN
+- pluggable filters?
