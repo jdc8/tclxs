@@ -1,0 +1,137 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+tcltest::test xsmsg-recv-1 {xsmsg} -body {
+    xsmsg recv
+} -returnCodes {error} -result {wrong # args: should be "xsmsg recv socket"}
+
+tcltest::test xsmsg-recv-2 {xsmsg} -body {
+    xsmsg recv s
+} -returnCodes {error} -result {invalid command name "s"}
+
+tcltest::test xsmsg-recv-3 {xsmsg} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    req sendmore "message"
+    req send "more"
+} -body {
+    xsmsg recv rep
+} -cleanup {
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message more}
+
+
+
+tcltest::test xsmsg-send-1 {xsmsg} -body {
+    xsmsg send
+} -returnCodes {error} -result {wrong # args: should be "xsmsg send socket msgl"}
+
+tcltest::test xsmsg-send-2 {xsmsg} -body {
+    xsmsg send s msgl
+} -returnCodes {error} -result {invalid command name "s"}
+
+tcltest::test xsmsg-send-3 {xsmsg} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+} -body {
+    xsmsg send req {a b c d e}
+    xsmsg recv rep
+} -cleanup {
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {a b c d e}
+
+
+
+tcltest::test xsmsg-unwrap-1 {xsmsg} -body {
+    xsmsg unwrap
+} -returnCodes {error} -result {wrong # args: should be "xsmsg unwrap msglnm"}
+
+tcltest::test xsmsg-unwrap-2 {xsmsg} -body {
+    set msgl {a b c d e}
+    set val [xsmsg unwrap msgl]
+    list $msgl $val
+} -returnCodes {ok} -result {{b c d e} a}
+
+tcltest::test xsmsg-unwrap-3 {xsmsg} -body {
+    set msgl {a {} b {} c d e}
+    set val1 [xsmsg unwrap msgl]
+    set val2 [xsmsg unwrap msgl]
+    set val3 [xsmsg unwrap msgl]
+    list $msgl $val3 $val2 $val1
+} -returnCodes {ok} -result {{d e} c b a}
+
+
+
+tcltest::test xsmsg-wrap-1 {xsmsg} -body {
+    xsmsg wrap
+} -returnCodes {error} -result {wrong # args: should be "xsmsg wrap msgl data"}
+
+tcltest::test xsmsg-wrap-2 {xsmsg} -body {
+    xsmsg wrap a b
+} -returnCodes {ok} -result {b {} a}
+
+
+
+tcltest::test xsmsg-push-1 {xsmsg} -body {
+    xsmsg push
+} -returnCodes {error} -result {wrong # args: should be "xsmsg push msgl data"}
+
+tcltest::test xsmsg-push-2 {xsmsg} -body {
+    xsmsg push a b
+} -returnCodes {ok} -result {b a}
+
+
+
+tcltest::test xsmsg-pop-1 {xsmsg} -body {
+    xsmsg pop
+} -returnCodes {error} -result {wrong # args: should be "xsmsg pop msglnm"}
+
+tcltest::test xsmsg-pop-2 {xsmsg} -body {
+    set msgl {a b c d e}
+    set val [xsmsg pop msgl]
+    list $msgl $val
+} -returnCodes {ok} -result {{b c d e} a}
+
+tcltest::test xsmsg-pop-3 {xsmsg} -body {
+    set msgl {a {} b {} c d e}
+    set val1 [xsmsg pop msgl]
+    set val2 [xsmsg pop msgl]
+    set val3 [xsmsg pop msgl]
+    list $msgl $val3 $val2 $val1
+} -returnCodes {ok} -result {{{} c d e} b {} a}
+
+
+
+tcltest::test xsmsg-add-1 {xsmsg} -body {
+    xsmsg add
+} -returnCodes {error} -result {wrong # args: should be "xsmsg add msgl data"}
+
+tcltest::test xsmsg-add-2 {xsmsg} -body {
+    xsmsg add {a b} c
+} -returnCodes {ok} -result {a b c}
+
+
+
+tcltest::test xsmsg-dump-1 {xsmsg} -body {
+    xsmsg dump
+} -returnCodes {error} -result {wrong # args: should be "xsmsg dump msgl"}
+
+tcltest::test xsmsg-dump-2 {xsmsg} -body {
+    xsmsg dump {a b c d}
+} -returnCodes {ok} -result {{[001] a} {[001] b} {[001] c} {[001] d}}
+
+# cleanup
+::tcltest::cleanupTests
+return
+
