@@ -1,0 +1,842 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+
+
+tcltest::test socket-1 {xs socket} -body {
+    xs socket
+} -returnCodes {error} -result {wrong # args: should be "xs socket ?name? context type"}
+
+
+
+tcltest::test socket-2.1 {xs socket} -body {
+    xs socket s c t
+} -returnCodes {error} -result {context "c" does not exists}
+
+tcltest::test socket-2.2 {xs socket} -body {
+    xs socket c t
+} -returnCodes {error} -result {context "c" does not exists}
+
+
+
+tcltest::test socket-3.1 {xs socket} -setup {
+    xs context ctx
+} -body {
+    xs socket s ctx t
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad type "t": must be PAIR, PUB, SUB, REQ, REP, XREQ, XREP, PULL, PUSH, XPUB, XSUB, SURVEYOR, RESPONDENT, XSURVEYOR, or XRESPONDENT}
+
+tcltest::test socket-3.2 {xs socket} -setup {
+    xs context ctx
+} -body {
+    xs socket ctx t
+} -cleanup {
+    ctx term
+} -returnCodes {error} -result {bad type "t": must be PAIR, PUB, SUB, REQ, REP, XREQ, XREP, PULL, PUSH, XPUB, XSUB, SURVEYOR, RESPONDENT, XSURVEYOR, or XRESPONDENT}
+
+tcltest::test socket-3.3 {xs socket} -setup {
+    xs context ctx
+} -body {
+    xs socket s ctx PUB
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {::s}
+
+tcltest::test socket-3.4 {xs socket} -setup {
+    xs context ctx
+} -body {
+    set s [xs socket ctx PUB]
+    string match "::xs*" $s
+} -cleanup {
+    $s close
+    ctx term
+} -returnCodes {ok} -result {1}
+
+tcltest::test socket-3.5 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    xs socket s ctx PUB
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {command "::s" already exists, unable to create object}
+
+tcltest::test socket-3.6 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s method ?argument ...?"}
+
+tcltest::test socket-3.7 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad method "qwerty": must be bind, cget, close, configure, connect, destroy, get, getsockopt, readable, recvmsg, sendmsg, dump, recv, send, sendmore, set, setsockopt, writable, or shutdown}
+
+
+
+tcltest::test socket-4.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s bind
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s bind endpoint"}
+
+tcltest::test socket-4.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s bind qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {Invalid argument}
+
+tcltest::test socket-4.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    set id [s bind "tcp://*:10003"]
+    string is integer -strict $id
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {1}
+
+
+
+tcltest::test socket-5.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s shutdown
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s shutdown endpoint_id"}
+
+tcltest::test socket-5.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+    s bind "tcp://*:10003"
+} -body {
+    s shutdown QWERTY
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {Wrong endpoint_id value, expected integer}
+
+tcltest::test socket-5.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+    set id [s bind "tcp://*:10003"]
+} -body {
+    s shutdown $id
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok}
+
+
+
+tcltest::test socket-6.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s close qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s close "}
+
+tcltest::test socket-6.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s close
+} -cleanup {
+    ctx term
+} -returnCodes {ok}
+
+
+
+tcltest::test socket-7.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s destroy qwerty
+} -cleanup {
+    s destroy
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s destroy "}
+
+tcltest::test socket-7.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s destroy
+} -cleanup {
+    ctx term
+} -returnCodes {ok}
+
+
+
+tcltest::test socket-8.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s connect
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s connect endpoint"}
+
+tcltest::test socket-8.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s connect qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {Invalid argument}
+
+tcltest::test socket-8.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    set id [s connect "tcp://localhost:10003"]
+    string is integer -strict $id
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result 1
+
+
+
+tcltest::test socket-9.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s getsockopt
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s getsockopt name"}
+
+tcltest::test socket-9.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s getsockopt qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad name "qwerty": must be HWM, SNDHWM, RCVHWM, AFFINITY, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, RATE, RECOVERY_IVL, SNDBUF, RCVBUF, RCVMORE, FD, EVENTS, TYPE, LINGER, RECONNECT_IVL, BACKLOG, RECONNECT_IVL_MAX, MAXMSGSIZE, MULTICAST_HOPS, RCVTIMEO, SNDTIMEO, IPV4ONLY, KEEPALIVE, PATTERN_VERSION, SURVEY_TIMEOUT, or SERVICE_ID}
+
+tcltest::test socket-9.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s cget
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s cget name"}
+
+tcltest::test socket-9.4 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s cget qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad name "qwerty": must be HWM, SNDHWM, RCVHWM, AFFINITY, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, RATE, RECOVERY_IVL, SNDBUF, RCVBUF, RCVMORE, FD, EVENTS, TYPE, LINGER, RECONNECT_IVL, BACKLOG, RECONNECT_IVL_MAX, MAXMSGSIZE, MULTICAST_HOPS, RCVTIMEO, SNDTIMEO, IPV4ONLY, KEEPALIVE, PATTERN_VERSION, SURVEY_TIMEOUT, or SERVICE_ID}
+
+tcltest::test socket-9.5 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    set ok 0
+    set nok 0
+    set cgok 0
+    set cgnok 0
+    set cok 0
+    set cnok 0
+    foreach name {HWM SNDHWM RCVHWM AFFINITY IDENTITY SUBSCRIBE UNSUBSCRIBE RATE RECOVERY_IVL SNDBUF RCVBUF RCVMORE FD EVENTS TYPE LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+	if {[catch {s getsockopt $name} msg]} {
+	    puts "get $name : $msg"
+	    incr nok
+	} else {
+	    incr ok
+	}
+	if {[catch {s cget $name} msg]} {
+	    puts "cget $name : $msg"
+	    incr cgnok
+	} else {
+	    incr cgok
+	}
+	if {[catch {s configure $name} msg]} {
+	    puts "configure $name : $msg"
+	    incr cnok
+	} else {
+	    incr cok
+	}
+    }
+    set a $ok.$nok-$cgok.$cgnok-$cok.$cnok
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {22.6-22.6-22.6}
+
+
+
+tcltest::test socket-10.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s readable 1 2 3 4
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s readable ?command?"}
+
+tcltest::test socket-10.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s readable
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {}
+
+tcltest::test socket-10.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s readable qwerty
+    s readable
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {qwerty}
+
+
+
+tcltest::test socket-11.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s recvmsg
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s recvmsg message ?flags?"}
+
+tcltest::test socket-11.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s recvmsg m
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {message "m" does not exists}
+
+tcltest::test socket-11.3 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mreq -data "message"
+    xs message mrep
+    req sendmsg mreq
+} -body {
+    rep recvmsg mrep
+    mrep data
+} -cleanup {
+    mrep close
+    mreq close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+
+
+tcltest::test socket-12.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s sendmsg
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s sendmsg message ?flags?"}
+
+tcltest::test socket-12.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s sendmsg m
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {message "m" does not exists}
+
+tcltest::test socket-12.3 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mreq -data "message"
+    xs message mrep
+} -body {
+    req sendmsg mreq
+    rep recvmsg mrep
+    mrep data
+} -cleanup {
+    mrep close
+    mreq close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+
+
+tcltest::test socket-13.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s dump 1 2 3 4
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s dump "}
+
+tcltest::test socket-13.2 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mreq -data "message"
+} -body {
+    req sendmsg mreq
+    rep dump
+} -cleanup {
+    mreq close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {{[007] message}}
+
+
+
+tcltest::test socket-14.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s recv 1 2 3 4
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s recv ?flags?"}
+
+tcltest::test socket-14.2 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mreq -data "message"
+    req sendmsg mreq
+} -body {
+    rep recv
+} -cleanup {
+    mreq close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+tcltest::test socket-14.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s recv QWERTY
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test socket-14.4 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mreq -data "message"
+    req sendmsg mreq
+    after 10
+} -body {
+    rep recv NOBLOCK
+} -cleanup {
+    mreq close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+
+
+tcltest::test socket-15.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s send
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s send data ?flags?"}
+
+tcltest::test socket-15.2 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+} -body {
+    req send "message"
+    rep recvmsg mrep
+    mrep data
+} -cleanup {
+    mrep close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+tcltest::test socket-15.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s send "test" QWERTY
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test socket-15.4 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+} -body {
+    req send "message" NOBLOCK
+    after 10
+    rep recvmsg mrep
+    mrep data
+} -cleanup {
+    mrep close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {message}
+
+
+
+tcltest::test socket-16.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s sendmore
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s sendmore data ?flags?"}
+
+tcltest::test socket-16.2 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+    xs message mrep_more
+} -body {
+    req sendmore "message"
+    req send "more"
+    rep recvmsg mrep
+    rep recvmsg mrep_more
+    set r [mrep data][mrep_more data]
+} -cleanup {
+    mrep close
+    mrep_more close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {messagemore}
+
+tcltest::test socket-16.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s sendmore "test" QWERTY
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad flag "QWERTY": must be DONTWAIT, NOBLOCK, or SNDMORE}
+
+tcltest::test socket-16.4 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+    xs message mrep_more
+} -body {
+    req sendmore "message" [list SNDMORE]
+    req send "more"
+    rep recvmsg mrep
+    rep recvmsg mrep_more
+    set r [mrep data][mrep_more data]
+} -cleanup {
+    mrep close
+    mrep_more close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {messagemore}
+
+
+
+tcltest::test socket-17.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s setsockopt
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s setsockopt name value ?size?"}
+
+tcltest::test socket-17.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s setsockopt qwerty azerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad name "qwerty": must be HWM, SNDHWM, RCVHWM, AFFINITY, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, RATE, RECOVERY_IVL, SNDBUF, RCVBUF, RCVMORE, FD, EVENTS, TYPE, LINGER, RECONNECT_IVL, BACKLOG, RECONNECT_IVL_MAX, MAXMSGSIZE, MULTICAST_HOPS, RCVTIMEO, SNDTIMEO, IPV4ONLY, KEEPALIVE, PATTERN_VERSION, SURVEY_TIMEOUT, or SERVICE_ID}
+
+tcltest::test socket-17.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s configure qwerty
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {bad name "qwerty": must be HWM, SNDHWM, RCVHWM, AFFINITY, IDENTITY, SUBSCRIBE, UNSUBSCRIBE, RATE, RECOVERY_IVL, SNDBUF, RCVBUF, RCVMORE, FD, EVENTS, TYPE, LINGER, RECONNECT_IVL, BACKLOG, RECONNECT_IVL_MAX, MAXMSGSIZE, MULTICAST_HOPS, RCVTIMEO, SNDTIMEO, IPV4ONLY, KEEPALIVE, PATTERN_VERSION, SURVEY_TIMEOUT, or SERVICE_ID}
+
+tcltest::test socket-17.4 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx SUB
+} -body {
+    set ok 0
+    set nok 0
+    set cok 0
+    set cnok 0
+    foreach name {HWM SNDHWM RCVHWM AFFINITY IDENTITY SUBSCRIBE UNSUBSCRIBE RATE RECOVERY_IVL SNDBUF RCVBUF RCVMORE FD EVENTS TYPE LINGER RECONNECT_IVL BACKLOG RECONNECT_IVL_MAX MAXMSGSIZE MULTICAST_HOPS RCVTIMEO SNDTIMEO IPV4ONLY KEEPALIVE PATTERN_VERSION SURVEY_TIMEOUT SERVICE_ID} {
+	if {[catch {s setsockopt $name 1} msg]} {
+	    puts "set $name : $msg"
+	    incr nok
+	} else {
+	    incr ok
+	}
+	if {[catch {s configure $name 1} msg]} {
+	    puts "configure $name : $msg"
+	    incr cnok
+	} else {
+	    incr cok
+	}
+    }
+    set a $ok.$nok-$cok.$cnok
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {21.7-21.7}
+
+tcltest::test socket-17.5 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s setsockopt HWM non_int
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {Wrong HWM argument, expected integer}
+
+tcltest::test socket-17.6 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s setsockopt IDENTITY "test id" non_int
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {Wrong size argument, expected integer}
+
+tcltest::test socket-17.7 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+} -body {
+    rep configure SNDHWM 3000 RCVHWM
+    set rt [list]
+    lappend rt [rep cget SNDHWM]
+    lappend rt [rep cget RCVHWM]
+} -cleanup {
+    rep close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "rep configure ?name? ?value option value ...?"}
+
+tcltest::test socket-17.8 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+} -body {
+    rep configure SNDHWM 3000 RCVHWM 4000
+    set rt [list]
+    lappend rt [rep cget SNDHWM]
+    lappend rt [rep cget RCVHWM]
+} -cleanup {
+    rep close
+    ctx term
+} -returnCodes {ok} -result {3000 4000}
+
+
+
+tcltest::test socket-18.1 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s writable 1 2 3 4
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {error} -result {wrong # args: should be "s writable ?command?"}
+
+tcltest::test socket-18.2 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s writable
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {}
+
+tcltest::test socket-18.3 {xs socket} -setup {
+    xs context ctx
+    xs socket s ctx PUB
+} -body {
+    s writable qwerty
+    s writable
+} -cleanup {
+    s close
+    ctx term
+} -returnCodes {ok} -result {qwerty}
+
+
+
+tcltest::test socket-19.1 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+    xs message mrep_more
+} -body {
+    set rt {}
+    after 10
+    lappend rt 1 [rep getsockopt EVENTS]
+    lappend rt [req getsockopt EVENTS]
+    req sendmore "message"
+    req send "more"
+    after 10
+    lappend rt 2 [rep getsockopt EVENTS]
+    lappend rt [req getsockopt EVENTS]
+    rep recvmsg mrep
+    rep recvmsg mrep_more
+    after 10
+    lappend rt 3 [rep getsockopt EVENTS]
+    lappend rt [req getsockopt EVENTS]
+} -cleanup {
+    mrep close
+    mrep_more close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {1 {} POLLOUT 2 POLLIN {} 3 POLLOUT {}}
+
+tcltest::test socket-19.2 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+    xs message mrep_more
+} -body {
+    set rt {}
+    after 10
+    lappend rt 1 [rep cget EVENTS]
+    lappend rt [req cget EVENTS]
+    req sendmore "message"
+    req send "more"
+    after 10
+    lappend rt 2 [rep cget EVENTS]
+    lappend rt [req cget EVENTS]
+    rep recvmsg mrep
+    rep recvmsg mrep_more
+    after 10
+    lappend rt 3 [rep cget EVENTS]
+    lappend rt [req cget EVENTS]
+} -cleanup {
+    mrep close
+    mrep_more close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {1 {} POLLOUT 2 POLLIN {} 3 POLLOUT {}}
+
+# cleanup
+::tcltest::cleanupTests
+return
+
