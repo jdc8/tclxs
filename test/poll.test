@@ -1,0 +1,116 @@
+package require tcltest
+set auto_path [list ../lib {*}$auto_path]
+package require -exact xs 1.2
+
+tcltest::test poll-1 {xs poll} -body {
+    xs poll
+} -returnCodes {error} -result {wrong # args: should be "xs poll socket_list timeout ?timeout_unit?"}
+
+tcltest::test poll-2.1 {xs poll} -body {
+    xs poll {} brol
+} -returnCodes {error} -result {Wrong timeout argument, expected integer}
+
+tcltest::test poll-2.2 {xs poll} -body {
+    xs poll {} 1 qwerty
+} -returnCodes {error} -result {bad timeout_unit "qwerty": must be s or ms}
+
+tcltest::test poll-2.3 {xs poll} -body {
+    xs poll {} 1 ms
+} -returnCodes {ok}
+
+tcltest::test poll-3 {xs poll} -body {
+    xs poll {} 0
+} -returnCodes {ok}
+
+tcltest::test poll-4 {xs poll} -body {
+    xs poll {a b} 0
+} -returnCodes {error} -result {socket not specified as list of <socket_handle list_of_event_flags>}
+
+tcltest::test poll-5 {xs poll} -body {
+    xs poll {{a f} {b f}} 0
+} -returnCodes {error} -result {socket "a" does not exists}
+
+tcltest::test poll-6 {xs poll} -setup {
+    xs context ctx
+    xs socket a ctx REP
+} -body {
+    xs poll {{a f} {b f}} 0
+} -cleanup {
+    a close
+    ctx term
+} -returnCodes {error} -result {bad event_flag "f": must be POLLIN, POLLOUT, or POLLERR}
+
+tcltest::test poll-7 {xs poll} -setup {
+    xs context ctx
+    xs socket a ctx REP
+} -body {
+    xs poll {{a POLLIN} {b f}} 0
+} -cleanup {
+    a close
+    ctx term
+} -returnCodes {error} -result {socket "b" does not exists}
+
+tcltest::test poll-8 {xs poll} -setup {
+    xs context ctx
+    xs socket a ctx REP
+    xs socket b ctx REQ
+} -body {
+    xs poll {{a POLLIN} {b ff}} 0
+} -cleanup {
+    a close
+    b close
+    ctx term
+} -returnCodes {error} -result {bad event_flag "ff": must be POLLIN, POLLOUT, or POLLERR}
+
+tcltest::test poll-9 {xs poll} -setup {
+    xs context ctx
+    xs socket a ctx REP
+    xs socket b ctx REQ
+} -body {
+    xs poll {{a POLLIN} {b {POLLOUT fff}}} 0
+} -cleanup {
+    a close
+    b close
+    ctx term
+} -returnCodes {error} -result {bad event_flag "fff": must be POLLIN, POLLOUT, or POLLERR}
+
+tcltest::test poll-10 {xs poll} -setup {
+    xs context ctx
+    xs socket a ctx REP
+    xs socket b ctx REQ
+} -body {
+    xs poll {{a POLLIN} {b POLLOUT}} 0
+} -cleanup {
+    a close
+    b close
+    ctx term
+} -returnCodes {ok} -result {}
+
+tcltest::test poll-11 {xs socket} -setup {
+    xs context ctx
+    xs socket rep ctx REP
+    rep bind "tcp://*:10003"
+    xs socket req ctx REQ
+    req connect "tcp://localhost:10003"
+    xs message mrep
+} -body {
+    set rt {}
+    after 10
+    lappend rt 1 {*}[xs poll {{rep POLLIN} {req POLLOUT}} 0]
+    req send "message"
+    after 10
+    lappend rt 2 {*}[xs poll {{rep POLLIN} {req POLLOUT}} 0]
+    rep recvmsg mrep
+    after 10
+    lappend rt 3 {*}[xs poll {{rep POLLIN} {req POLLOUT}} 0]
+} -cleanup {
+    mrep close
+    req close
+    rep close
+    ctx term
+} -returnCodes {ok} -result {1 {req POLLOUT} 2 {rep POLLIN} 3}
+
+# cleanup
+::tcltest::cleanupTests
+return
+
