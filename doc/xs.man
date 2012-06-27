@@ -1,0 +1,91 @@
+[comment {-*- tcl -*- doctools manpage}]
+[manpage_begin xs n 1.2.0]
+[copyright {Jos Decoster <jos.decoster@gmail.com>}]
+[moddesc {A Tcl wrapper for the Crossroads I/O library}]
+[category  {Messaging}]
+[keywords {messaging}]
+[keywords {inter process communication}]
+[keywords {RPC}]
+[keywords {message queue}]
+[keywords {queue}]
+[keywords {broadcast}]
+[keywords {communication}]
+[keywords {producer - consumer}]
+[keywords {publish - subscribe}]
+[titledesc {Crossroads I/O Package Reference}]
+[require Tcl 8.5]
+[require xs [opt 1.2.0]]
+[description]
+
+The [term xs] package is a wrapper for the Crossroads I/O library. The
+Crossroads I/O library can be found at [uri http://www.crossroads.io].
+
+[para]
+
+The wrapper is based on version 1.2 of the Crossroads I/O library. The package
+is written using [term critcl] 3.
+
+[para]
+
+Use this documentation in combination with the Crossroads I/O documentation for more
+details.
+
+[para]
+
+All sockets in this documentation refer to Crossroads I/O sockets.
+
+[para]
+
+The Crossroads I/O API use [term set] and [term get] functions to set or get
+context, socket and message options. This wrapper provides [term set] and
+[term get] methods for contexts, sockets and message for compatibility with the
+Crossroads I/O API but also provides the more Tcl style [term cget] and
+[term configure] methods.
+
+[para]
+
+The Crossroads I/O API uses [term term] for contexts and [term close] for
+sockets and messages. This wrapper provides the same methods for compatibility
+with the Crossroads I/O API but also provides a [term destroy] method for
+sockets and messages.
+
+
+[include xs_context.inc]
+[include xs_socket.inc]
+[include xs_message.inc]
+[include xs_multipart.inc]
+[include xs_polling.inc]
+[include xs_misc.inc]
+[include xs_examples.inc]
+
+[section "Bugs, ideas, feedback"]
+
+This document, and the package it describes, will undoubtedly contain
+bugs and other problems.
+
+Please report such at the [uri {https://github.com/jdc8/tclxs/issues} {Github tracker}].
+
+Please also report any ideas for enhancements you may have for either
+package and/or documentation.
+
+[section "License"]
+
+[term xs] uses different licenses for different parts of the code.
+
+The 'core' of [term xs] (located in [term xs.tcl]) is licensed under
+LGPLv3. This just means that if you make any changes to how that code works, you
+must release those changes under the LGPL. If you just use [term xs], then you
+can use any license you want for your own code. Check [term COPYING.LESSER] for
+more info.
+
+[para]
+
+The restrictions imposed by the LGPL make no sense for the 'non-core'
+functionality in [term xs] (derivative code must also be LGPL or GPL),
+especially for examples, so all 'non-core' code is relicensed under the more
+permissive BSD (specifically Modified BSD aka New BSD aka 3-clause BSD), where
+possible. This means that you can copy this code and build your own apps without
+needing to license your own code with the LGPL or GPL. Check [term COPYING.BSD]
+for more info.
+
+[manpage_end]

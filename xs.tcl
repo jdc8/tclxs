@@ -714,14 +714,14 @@ critcl::ccode {
     int xs_socket_objcmd(ClientData cd, Tcl_Interp* ip, int objc, Tcl_Obj* const objv[]) {
 	static const char* methods[] = {"bind", "cget", "close", "configure", "connect",
 					"destroy", "get", "getsockopt",
-					"readable", "recvmsg", "sendmsg", "dump", "recv",
-					"send", "sendmore", "set", "setsockopt",
-					"writable", "shutdown", NULL};
+					"readable", "recvmsg", "recv_msg", "sendmsg", "send_msg",
+					"dump", "recv", "send", "sendmore", "set",
+					"setsockopt", "writable", "shutdown", NULL};
 	enum ExObjSocketMethods {EXSOCKOBJ_BIND, EXSOCKOBJ_CGET, EXSOCKOBJ_CLOSE, EXSOCKOBJ_CONFIGURE, EXSOCKOBJ_CONNECT,
 				 EXSOCKOBJ_DESTROY, EXSOCKOBJ_GET, EXSOCKOBJ_GETSOCKETOPT,
-				 EXSOCKOBJ_READABLE, EXSOCKOBJ_RECVMSG, EXSOCKOBJ_SENDMSG, EXSOCKOBJ_DUMP, EXSOCKOBJ_RECV,
-				 EXSOCKOBJ_SEND, EXSOCKOBJ_SENDMORE, EXSOCKOBJ_SET, EXSOCKOBJ_SETSOCKETOPT,
-				 EXSOCKOBJ_WRITABLE, EXSOCKOBJ_SHUTDOWN};
+				 EXSOCKOBJ_READABLE, EXSOCKOBJ_RECVMSG, EXSOCKOBJ_RECV_MSG, EXSOCKOBJ_SENDMSG, EXSOCKOBJ_SEND_MSG,
+				 EXSOCKOBJ_DUMP, EXSOCKOBJ_RECV, EXSOCKOBJ_SEND, EXSOCKOBJ_SENDMORE, EXSOCKOBJ_SET,
+				 EXSOCKOBJ_SETSOCKETOPT, EXSOCKOBJ_WRITABLE, EXSOCKOBJ_SHUTDOWN};
 	int index = -1;
 	void* sockp = ((XsSocketClientData*)cd)->socket;
 	XsClientData* xsClientData = (((XsSocketClientData*)cd)->xsClientData);
@@ -911,6 +911,7 @@ critcl::ccode {
 	    break;
 	}
 	case EXSOCKOBJ_RECVMSG:
+	case EXSOCKOBJ_RECV_MSG:
 	{
 	    void* msgp = 0;
 	    int flags = 0;
@@ -936,6 +937,7 @@ critcl::ccode {
 	    break;
 	}
 	case EXSOCKOBJ_SENDMSG:
+	case EXSOCKOBJ_SEND_MSG:
 	{
 	    void* msgp = 0;
 	    int flags = 0;
