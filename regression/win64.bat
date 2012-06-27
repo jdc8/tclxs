@@ -1,8 +1,8 @@
 set TCLSH=c:\Tcl\bin\tclsh.exe
 
-git clone git://github.com/zeromq/libzmq.git libzmq31
-git clone git://github.com/jdc8/tclzmq.git
-cd tclzmq
+git clone https://github.com/crossroads-io/libxs.git
+git clone https://github.com/jdc8/tclxs.git
+cd tclxs
 cd zmq_nMakefiles
 nmake ZMQDIR=..\..\libzmq31 all64
 cd ..

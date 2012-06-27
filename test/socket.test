@@ -83,7 +83,7 @@ tcltest::test socket-3.7 {xs socket} -setup {
 } -cleanup {
     s close
     ctx term
-} -returnCodes {error} -result {bad method "qwerty": must be bind, cget, close, configure, connect, destroy, get, getsockopt, readable, recvmsg, sendmsg, dump, recv, send, sendmore, set, setsockopt, writable, or shutdown}
+} -returnCodes {error} -result {bad method "qwerty": must be bind, cget, close, configure, connect, destroy, get, getsockopt, readable, recvmsg, recv_msg, sendmsg, send_msg, dump, recv, send, sendmore, set, setsockopt, writable, or shutdown}
 
 
 
