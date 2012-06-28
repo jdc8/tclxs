@@ -16,10 +16,21 @@ INSTALLDIR = .
 
 include_HEADERS = $(XSDIR)\include\xs\xs.h
 
-CFLAGS =    /c /Zi /nologo /W3 /WX- /MP /O2 /GL /I. /I$(XSDIR)\include /I$(XSDIR)\src /I$(XSDIR)\builds\msvc /D NDEBUG /D _WIN64 /D _CRT_SECURE_NO_WARNINGS /D DLL_EXPORT /D FD_SETSIZE=1024 /D _WINDOWS /D _USRDLL /D _BIND_TO_CURRENT_VCLIBS_VERSION=1 /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Gd /TP /wd4355 /FIprecompiled.hpp /Zc:forScope /Fo"work/"
+IFLAGS = /I. /I$(XSDIR)\include /I$(XSDIR)\src /I$(XSDIR)\builds\msvc
 
-CLCFLAGS = $(CFLAGS) /Yu"precompiled.hpp"
-PCCFLAGS = $(CFLAGS) /Yc"precompiled.hpp"
+DFLAGS = /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D DLL_EXPORT /D FD_SETSIZE=1024 /D _WINDOWS /D _USRDLL /D _BIND_TO_CURRENT_VCLIBS_VERSION=1 /D _MBCS
+
+CFLAGS = /c /Zi /nologo /W3 /WX- /MP /O2 /GL $(IFLAGS) $(DFLAGS) /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /FIprecompiled.hpp /Zc:forScope /Fo"work/" /Gd /TP /wd4355
+
+CFLAGS64 =  /D _WIN64 $(CFLAGS)
+
+CFLAGS32 =  /D WIN32 /arch:SSE2 $(CFLAGS)
+
+CLCFLAGS32 = $(CFLAGS32) /Yu"precompiled.hpp"
+PCCFLAGS32 = $(CFLAGS32) /Yc"precompiled.hpp"
+
+CLCFLAGS64 = $(CFLAGS64) /Yu"precompiled.hpp"
+PCCFLAGS64 = $(CFLAGS64) /Yc"precompiled.hpp"
 
 SOURCES = \
     $(XSDIR)\src\address.cpp \
@@ -103,13 +114,13 @@ lib32: objs32
 
 objs64: $(SOURCES)
 	- mkdir work
-	cl $(XSDIR)\src\precompiled.cpp $(PCCFLAGS) /D _WIN64
-	cl $(SOURCES) $(CLCFLAGS) /D _WIN64
+	cl $(XSDIR)\src\precompiled.cpp $(PCCFLAGS64) /D _WIN64
+	cl $(SOURCES) $(CLCFLAGS64) /D _WIN64
 
 objs32: $(SOURCES)
 	- mkdir work
-	cl $(XSDIR)\src\precompiled.cpp $(PCCFLAGS)
-	cl $(SOURCES) $(CLCFLAGS)
+	cl $(XSDIR)\src\precompiled.cpp $(PCCFLAGS32)
+	cl $(SOURCES) $(CLCFLAGS32)
 
 clean:
 	rmdir /S /Q work
