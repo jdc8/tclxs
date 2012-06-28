@@ -16,7 +16,7 @@ INSTALLDIR = .
 
 include_HEADERS = $(XSDIR)\include\xs\xs.h
 
-CFLAGS =    /c /Zi /nologo /W3 /WX- /MP /O2 /GL /I. /I$(XSDIR)\include /I$(XSDIR)\src /D NDEBUG /D _WIN64 /D _CRT_SECURE_NO_WARNINGS /D DLL_EXPORT /D FD_SETSIZE=1024 /D _WINDOWS /D _USRDLL /D _BIND_TO_CURRENT_VCLIBS_VERSION=1 /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Gd /TP /wd4355 /FIprecompiled.hpp /Zc:forScope /Fo"work/"
+CFLAGS =    /c /Zi /nologo /W3 /WX- /MP /O2 /GL /I. /I$(XSDIR)\include /I$(XSDIR)\src /I$(XSDIR)\builds\msvc /D NDEBUG /D _WIN64 /D _CRT_SECURE_NO_WARNINGS /D DLL_EXPORT /D FD_SETSIZE=1024 /D _WINDOWS /D _USRDLL /D _BIND_TO_CURRENT_VCLIBS_VERSION=1 /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Gd /TP /wd4355 /FIprecompiled.hpp /Zc:forScope /Fo"work/"
 
 CLCFLAGS = $(CFLAGS) /Yu"precompiled.hpp"
 PCCFLAGS = $(CFLAGS) /Yc"precompiled.hpp"
