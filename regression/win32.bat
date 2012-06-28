@@ -7,7 +7,7 @@ cd tclxs\regression
 nmake XS=..\..\libxs all32
 
 cd ..
-%TCLSH% build.tcl install -xs ..\libxs -static
+%TCLSH% build.tcl install -xs regression -static
 cd test
 %TCLSH% all.tcl
 
