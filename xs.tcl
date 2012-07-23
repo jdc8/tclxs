@@ -18,7 +18,7 @@ critcl::meta origin https://github.com/jdc8/tclxs
 critcl::userconfig define mode {choose mode of Crossroads I/O to build and link against.} {static dynamic}
 
 if {[string match "win32*" [::critcl::targetplatform]]} {
-    critcl::clibraries -llibxs -luuid -lws2_32 -lcomctl32 -lrpcrt4
+    critcl::clibraries -llibxs -luuid -lws2_32 -lcomctl32 -lrpcrt4 -ladvapi32 -lshell32
     switch -exact -- [critcl::userconfig query mode] {
 	static {
 	    critcl::cflags /DDLL_EXPORT
