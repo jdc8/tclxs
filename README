@@ -1,0 +1,53 @@
+Intro
+=====
+
+xs is a wrapper for the Crossroads I/O library (http://www.crossroads.io/).
+
+License
+=======
+
+xs uses different licenses for different parts of the code.
+
+The 'core' of xs (located in xs.tcl) is licensed under LGPLv3. This just
+means that if you make any changes to how that code works, you must release
+those changes under the LGPL. If you just use xs, then you can use any
+license you want for your own code. Check COPYING.LESSER for more info.
+
+The restrictions imposed by the LGPL make no sense for the 'non-core'
+functionality in xs (derivative code must also be LGPL or GPL), especially
+for examples, so all 'non-core' code is relicensed under the more permissive BSD
+(specifically Modified BSD aka New BSD aka 3-clause BSD), where possible. This
+means that you can copy this code and build your own apps without needing to
+license your own code with the LGPL or GPL. Check COPYING.BSD for more info.
+
+Building
+========
+
+Requirements:
+
+- Crossroads I/O from git repository at
+
+    https://github.com/crossroads-io/libxs
+
+  When you want to link 0MQ to the Tcl package statically on Linux, make sure to
+  set the CFLAGS and CXXFLAGS environment variables to -fPIC before running
+  configure.
+
+- Tcl 8.5 or 8.6
+
+- Critcl 3
+
+On linux and windows:
+
+- run "tclsh build.tcl"
+
+Type "tclsh build.tcl --help" for more information.
+
+The package can be linked against Crossroads I/O statically or
+dynamicallly. Default is dynamic. Use the -static option to choose static
+linking.
+
+Usage
+=====
+
+Check the docs directory for more information about this wrapper.
