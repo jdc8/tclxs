@@ -1252,6 +1252,7 @@ critcl::ccode {
 	    }
 	    rt = xs_msg_close(msgp);
 	    last_xs_errno = xs_errno();
+	    ckfree(msgp);
 	    if (rt == 0) {
 		Tcl_DecrRefCount(((XsMessageClientData*)cd)->tcl_cmd);
 		Tcl_DeleteCommand(ip, Tcl_GetStringFromObj(objv[0], 0));
