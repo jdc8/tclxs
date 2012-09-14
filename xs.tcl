@@ -45,7 +45,7 @@ if {[string match "win32*" [::critcl::targetplatform]]} {
     }
 }
 
-critcl::cflags -ansi -pedantic -Wall
+critcl::cflags -pedantic -Wall
 
 
 # Get local build configuration
@@ -1615,20 +1615,20 @@ critcl::ccode {
     }
 }
 
-critcl::ccommand ::xs::version {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::version {cd ip objc objv} {
     int major=0, minor=0, patch=0;
     char version[128];
     xs_version(&major, &minor, &patch);
     sprintf(version, "%d.%d.%d", major, minor, patch);
     Tcl_SetObjResult(ip, Tcl_NewStringObj(version, -1));
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
 critcl::cproc ::xs::errno {} int {
     return last_xs_errno;
 }
 
-critcl::ccommand ::xs::strerror {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::strerror {cd ip objc objv} {
     int errnum = 0;
     if (objc != 2) {
 	Tcl_WrongNumArgs(ip, 1, objv, "errnum");
@@ -1640,9 +1640,9 @@ critcl::ccommand ::xs::strerror {cd ip objc objv} -clientdata xsClientDataInitVa
     }
     Tcl_SetObjResult(ip, Tcl_NewStringObj(xs_strerror(errnum), -1));
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
-critcl::ccommand ::xs::max_block_time {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::max_block_time {cd ip objc objv} {
     int block_time = 0;
     XsClientData* xsClientData = (XsClientData*)cd;
     if (objc != 2) {
@@ -1655,9 +1655,9 @@ critcl::ccommand ::xs::max_block_time {cd ip objc objv} -clientdata xsClientData
     }
     xsClientData->block_time = block_time;
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
-critcl::ccommand ::xs::context {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::context {cd ip objc objv} {
     Tcl_Obj* fqn = 0;
     void* xsp = 0;
     XsContextClientData* ccd = 0;
@@ -1697,9 +1697,9 @@ critcl::ccommand ::xs::context {cd ip objc objv} -clientdata xsClientDataInitVar
     Tcl_SetObjResult(ip, fqn);
     Tcl_CreateEventSource(xsEventSetup, xsEventCheck, cd);
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
-critcl::ccommand ::xs::socket {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::socket {cd ip objc objv} {
     Tcl_Obj* fqn = 0;
     void* ctxp = 0;
     int stype = 0;
@@ -1769,9 +1769,9 @@ critcl::ccommand ::xs::socket {cd ip objc objv} -clientdata xsClientDataInitVar 
     Tcl_CreateObjCommand(ip, Tcl_GetStringFromObj(fqn, 0), xs_socket_objcmd, (ClientData)scd, xs_free_client_data);
     Tcl_SetObjResult(ip, fqn);
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
-critcl::ccommand ::xs::message {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::message {cd ip objc objv} {
     char* data = 0;
     int size = -1;
     Tcl_Obj* fqn = 0;
@@ -1853,9 +1853,9 @@ critcl::ccommand ::xs::message {cd ip objc objv} -clientdata xsClientDataInitVar
     Tcl_CreateObjCommand(ip, Tcl_GetStringFromObj(fqn, 0), xs_message_objcmd, (ClientData)mcd, xs_free_client_data);
     Tcl_SetObjResult(ip, fqn);
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
-critcl::ccommand ::xs::poll {cd ip objc objv} -clientdata xsClientDataInitVar {
+critcl::ccommand ::xs::poll {cd ip objc objv} {
     int slobjc = 0;
     Tcl_Obj** slobjv = 0;
     int i = 0;
@@ -1940,7 +1940,7 @@ critcl::ccommand ::xs::poll {cd ip objc objv} -clientdata xsClientDataInitVar {
     Tcl_SetObjResult(ip, result);
     ckfree((void*)sockl);
     return TCL_OK;
-}
+} -clientdata xsClientDataInitVar
 
 critcl::ccommand ::xs::zframe_strhex {cd ip objc objv} {
     char* data = 0;
